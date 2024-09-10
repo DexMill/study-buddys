@@ -21,5 +21,119 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// DOM elements
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const profile = document.getElementById("profile");
+const matches = document.getElementById("matches");
+const nameInput = document.getElementById("name");
+const subjectInput = document.getElementById("subject");
+const updateProfileBtn = document.getElementById("updateProfile");
+const matchList = document.getElementById("matchList");
+
+// Authentication state observer
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+    profile.style.display = "block";
+    matches.style.display = "block";
+    loadProfile();
+    loadMatches();
+  } else {
+    loginBtn.style.display = "block";
+    logoutBtn.style.display = "none";
+    profile.style.display = "none";
+    matches.style.display = "none";
+  }
+});
+
+// Login
+loginBtn.addEventListener("click", () => {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+});
+
+// Logout
+logoutBtn.addEventListener("click", () => {
+  auth.signOut();
+});
+
+// Update profile
+updateProfileBtn.addEventListener("click", () => {
+  const user = auth.currentUser;
+  if (user) {
+    db.collection("users")
+      .doc(user.uid)
+      .set({
+        name: nameInput.value,
+        subject: subjectInput.value,
+      })
+      .then(() => {
+        alert("Profile updated successfully!");
+        loadMatches();
+      })
+      .catch((error) => {
+        console.error("Error updating profile: ", error);
+      });
+  }
+});
+
+// Load user profile
+function loadProfile() {
+  const user = auth.currentUser;
+  if (user) {
+    db.collection("users")
+      .doc(user.uid)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          nameInput.value = data.name || "";
+          subjectInput.value = data.subject || "";
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading profile: ", error);
+      });
+  }
+}
+
+// Load matches
+function loadMatches() {
+  const user = auth.currentUser;
+  if (user) {
+    db.collection("users")
+      .doc(user.uid)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
+          db.collection("users")
+            .where("subject", "==", userData.subject)
+            .get()
+            .then((querySnapshot) => {
+              matchList.innerHTML = "";
+              querySnapshot.forEach((doc) => {
+                if (doc.id !== user.uid) {
+                  const matchData = doc.data();
+                  const li = document.createElement("li");
+                  li.textContent = `${matchData.name} - ${matchData.subject}`;
+                  matchList.appendChild(li);
+                }
+              });
+            })
+            .catch((error) => {
+              console.error("Error loading matches: ", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading user data: ", error);
+      });
+  }
+}

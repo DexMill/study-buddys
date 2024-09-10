@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Study Buddy Matcher</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>Study Buddy Matcher</h1>
+      <div id="auth">
+        <button id="loginBtn">Login</button>
+        <button id="logoutBtn" style="display: none">Logout</button>
+      </div>
+      <div id="profile" style="display: none">
+        <h2>Your Profile</h2>
+        <input type="text" id="name" placeholder="Your Name" />
+        <input
+          type="text"
+          id="subject"
+          placeholder="Subject you need help with"
+        />
+        <button id="updateProfile">Update Profile</button>
+      </div>
+      <div id="matches" style="display: none">
+        <h2>Study Buddies</h2>
+        <ul id="matchList"></ul>
+      </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
